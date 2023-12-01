@@ -30,7 +30,7 @@ namespace PicoGKExamples
         public static void Task()
         {
             var unitCellName = "LatticeRobot-Diamond_TPMS";
-            ImplicitUnitCell unitCell = new (Path.Combine(@"..\..\..\LatticeRobot_Library\", unitCellName), 2);
+            ImplicitUnitCell unitCell = new (Path.Combine(@"..\..\..\LEAP71_ShapeKernel\ShapeKernel\LatticeRobot\LatticeRobot_Library\", unitCellName), 2);
 
             var box = unitCell.Bounds;  // centered at origin
             box.vecMin.X *= 5;
