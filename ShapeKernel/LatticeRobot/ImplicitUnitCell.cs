@@ -16,6 +16,14 @@ public class ImplicitUnitCell : IImplicit {
 
     public Dictionary<string, ImplicitParameter> Parameters { get; private set; }
 
+    public BBox3 Bounds {
+        get {
+            var halfsize = new Vector3((float)Parameters["size_x"].defaultValue, (float)Parameters["size_y"].defaultValue, (float)Parameters["size_z"].defaultValue) * 0.5f;
+            return new BBox3(-halfsize, halfsize);
+        }
+    }
+    public Action<ImplicitUnitCell, Vector3> AdjustParameters { get; set; }
+
     const string sourcePath = @"..\..\..\LEAP71_ShapeKernel\ShapeKernel\LatticeRobot";
 
     public ImplicitUnitCell(string codeRepPath, int latticeIndex) {
@@ -69,15 +77,9 @@ public class ImplicitUnitCell : IImplicit {
     }
 
     public float fSignedDistance(in Vector3 p) {
+        AdjustParameters?.Invoke(this, p);
         var g4p = new Vector3d(p.X, p.Y, p.Z);
         return (float)(double)valueMethod.Invoke(null, new object[] { g4p });
-    }
-
-    public BBox3 Bounds {
-        get {
-            var halfsize = new Vector3((float)Parameters["size_x"].defaultValue, (float)Parameters["size_y"].defaultValue, (float)Parameters["size_z"].defaultValue) * 0.5f;
-            return new BBox3(-halfsize, halfsize);
-        }
     }
 
     private static Type BuildImplicit(IEnumerable<string> sources) {

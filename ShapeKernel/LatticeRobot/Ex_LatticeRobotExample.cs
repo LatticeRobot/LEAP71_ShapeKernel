@@ -29,26 +29,25 @@ namespace PicoGKExamples
     {
         public static void Task()
         {
-            var unitCellLocation = "LatticeRobot-Diamond_TPMS";
-            var unitCell = new ImplicitUnitCell(Path.Combine(@"..\..\..\LatticeRobot_Library\", unitCellLocation), 2);
+            var unitCellName = "LatticeRobot-Diamond_TPMS";
+            ImplicitUnitCell unitCell = new (Path.Combine(@"..\..\..\LatticeRobot_Library\", unitCellName), 2);
 
-            // With this implementation of ImplicitUnitCell, we can only set constant parameters.  
-            unitCell.SetParameter("gyroid", 0.25);
+            var box = unitCell.Bounds;  // centered at origin
+            box.vecMin.X *= 5;
+            box.vecMax.X *= 5;
 
+            unitCell.AdjustParameters = (ImplicitUnitCell unitCell, Vector3 p) => 
+            {
+                double diamondToGyroid = Math.Clamp((p.X - box.vecMin.X) / (box.vecMax.X - box.vecMin.X), 0, 1);
+                unitCell.SetParameter("gyroid", diamondToGyroid);
+            };
 
             try
             {
+                Voxels voxL = new(unitCell, box);
+
                 Library.oViewer().SetGroupMaterial(0, "3291a0", 0f, 1f);
-
-                // Create a new voxel field, which renders the lattice
-                // we are passing the bounding box of the lattice, so that
-                // we know which area in the voxel field to evaluate
-
-                Voxels voxL = new(unitCell, unitCell.Bounds);
-
-                // Let's show what we got
                 Library.oViewer().Add(voxL);
-
             }
 
             catch (Exception e)
