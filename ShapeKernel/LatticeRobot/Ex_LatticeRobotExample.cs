@@ -16,6 +16,7 @@
 // THE SOFTWARE.
 //
 
+using Leap71.ShapeKernel;
 using PicoGK;
 using System.Numerics;
 
@@ -27,19 +28,60 @@ namespace PicoGKExamples
 
     class LatticeRobotExample
     {
-        public static void Task()
+        public static void DiamondToGyroidTask()
         {
             var unitCellName = "LatticeRobot-Diamond_TPMS";
-            ImplicitUnitCell unitCell = new (Path.Combine(@"..\..\..\LEAP71_ShapeKernel\ShapeKernel\LatticeRobot\LatticeRobot_Library\", unitCellName), 2);
+            ImplicitUnitCell unitCell = new (Path.Combine(@"..\..\..\LEAP71_ShapeKernel\ShapeKernel\LatticeRobot\LatticeRobot_Library\", unitCellName), LatticeVariant.Thin);
 
             var box = unitCell.Bounds;  // centered at origin
             box.vecMin.X *= 5;
             box.vecMax.X *= 5;
 
-            unitCell.AdjustParameters = (ImplicitUnitCell unitCell, Vector3 p) => 
+            unitCell.AdjustParameters = (ImplicitUnitCell thisCell, Vector3 p) => 
             {
                 double diamondToGyroid = Math.Clamp((p.X - box.vecMin.X) / (box.vecMax.X - box.vecMin.X), 0, 1);
-                unitCell.SetParameter("gyroid", diamondToGyroid);
+                thisCell.SetParameter("gyroid", diamondToGyroid);
+
+                double thickness = 4 - 3 * Math.Clamp((p.Z - box.vecMin.Z) / (box.vecMax.Z - box.vecMin.Z), 0, 1);
+                thisCell.SetParameter("thickness", thickness);
+            };
+
+            try
+            {
+                Voxels voxL = new(unitCell, box);
+
+                Library.oViewer().SetGroupMaterial(0, "3291a0", 0f, 1f);
+                Library.oViewer().Add(voxL);
+            }
+
+            catch (Exception e)
+            {
+                Library.Log($"Failed to run example: \n{e.Message}"); ;
+            }
+        }
+
+        public static void SpinodalTask()
+        {
+            var unitCellName = "LatticeRobot-Spinodal_Noise";
+            ImplicitUnitCell unitCell = new (Path.Combine(@"..\..\..\LEAP71_ShapeKernel\ShapeKernel\LatticeRobot\LatticeRobot_Library\", unitCellName), LatticeVariant.Thin);
+
+            var box = unitCell.Bounds;  // centered at origin
+            box.vecMin.X *= 5;
+            box.vecMax.X *= 5;
+            box.vecMin.Y *= 5;
+            box.vecMax.Y *= 5;
+
+            unitCell.SetParameter("anisotropy", 0.2);
+
+            unitCell.AdjustParameters = (ImplicitUnitCell thisCell, Vector3 p) => 
+            {
+                var direction = p.Normalize();
+                thisCell.SetParameter("direction_x", direction.X);
+                thisCell.SetParameter("direction_y", direction.Y);
+                thisCell.SetParameter("direction_z", direction.Z);
+
+                double thickness = 4 - 3 * Math.Clamp((p.Z - box.vecMin.Z) / (box.vecMax.Z - box.vecMin.Z), 0, 1);
+                thisCell.SetParameter("thickness", thickness);
             };
 
             try
@@ -56,5 +98,7 @@ namespace PicoGKExamples
             }
         }
     }
+
+    
 }
 

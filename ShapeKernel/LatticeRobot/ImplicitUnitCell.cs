@@ -10,7 +10,7 @@ using PicoGK;
 using g4;
 
 public class ImplicitUnitCell : IImplicit {
-    private FieldInfo latticeIndexField;
+    private FieldInfo variantIndexField;
     Type unitCellType;
     MethodInfo valueMethod;
 
@@ -26,7 +26,7 @@ public class ImplicitUnitCell : IImplicit {
 
     const string sourcePath = @"..\..\..\LEAP71_ShapeKernel\ShapeKernel\LatticeRobot";
 
-    public ImplicitUnitCell(string codeRepPath, int latticeIndex) {
+    public ImplicitUnitCell(string codeRepPath, LatticeVariant variantIndex) {
         Console.WriteLine($"Using unit cell {codeRepPath}.");
 
         var manifestContent = ReadText(Path.Combine(codeRepPath, "manifest.json"));
@@ -50,9 +50,11 @@ public class ImplicitUnitCell : IImplicit {
         if (unitCellType == null) 
             throw new Exception("Error compiling unit cell.");
 
-        var latticeIndexField = unitCellType.GetField("VariantIndex");
-        if (latticeIndexField is null)
+        var variantIndexField = unitCellType.GetField("VariantIndex");
+        if (variantIndexField is null)
             throw new Exception("Error getting VariantIndex field.");
+
+        variantIndexField.SetValue(null, (int)variantIndex);
 
         foreach (var p in Parameters.Values) {
             SetParameter(p.name, p.defaultValue);
@@ -64,9 +66,9 @@ public class ImplicitUnitCell : IImplicit {
 
     }
 
-    public int VariantIndex {
-        get => (int)latticeIndexField.GetValue(null);
-        set => latticeIndexField.SetValue(null, value);
+    public LatticeVariant VariantIndex {
+        get => (LatticeVariant)(int)variantIndexField.GetValue(null);
+        set => variantIndexField.SetValue(null, (int)value);
     }
 
     public void SetParameter(string name, double value) {

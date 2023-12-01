@@ -1,6 +1,6 @@
 public enum LatticeVariant {
-    solid = 0,
-    inverse = 1,
-    thin = 2,
-    twin = 3
+    Solid = 0,
+    Inverse = 1,
+    Thin = 2,
+    Twin = 3
 }

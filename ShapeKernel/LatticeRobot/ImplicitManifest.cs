@@ -10,5 +10,5 @@ public class ImplicitManifest {
     public string name = "LatticeRobot Lattice";
     public IList<ImplicitParameter> parameters = new List<ImplicitParameter>();
     public string profileImage = "";
-    public LatticeVariant defaultVariant = LatticeVariant.thin;
+    public LatticeVariant defaultVariant = LatticeVariant.Thin;
 }
